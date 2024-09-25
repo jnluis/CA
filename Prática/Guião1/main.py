@@ -4,13 +4,14 @@ import sys
 from collections import Counter
 from ciphers import *
 import re
+from unicodedata import normalize
 
 letters = "abcdefghijklmnopqrstuvwxyz"
 
 
 def frequency_and_n_grams(cleantext):
     total_number_of_letters = 0
-    letter_dict = {letter: 0 for letter in letters}  # dictionary comprehension
+    letter_dict = {letter: 0 for letter in letters}
     for letter in cleantext:
         if letter in letter_dict:
             letter_dict[letter.lower()] += 1
@@ -20,7 +21,7 @@ def frequency_and_n_grams(cleantext):
     )
     total_number_of_letters = sum(
         letter_dict.values()
-    )  # Não pode ser a contar a length do texto porque o texto pode ter espaços e pontuação
+    )  # Como já não tem espaços e pontuação, também podíamos fazer a length do texto
 
     for value, letter in sorted_pairs:
         percentage = value / total_number_of_letters
@@ -47,21 +48,14 @@ def frequency_and_n_grams(cleantext):
 
 def readfile(pathfile):
     cleantext = ""
-    with open(pathfile, "r") as file:
+    with open(pathfile, "r", encoding="utf-8") as file:
         for line in file:
-            filteredline = (
-                line.strip()
-            )  # não sei se é preciso tirar a pontuação e os espaços ou se mantemos tudo como o original
-            # Dar replace aqui das letras com acentos e cedilhas por normais???
-            # filteredline = filteredline.replace(" ", "")
-            # filteredline = filteredline.replace("-", "")
-            # filteredline = filteredline.replace(".", "")
-            # filteredline = filteredline.replace(",", "")
-            # filteredline = filteredline.replace(";", "")
-            # filteredline = filteredline.replace(":", "")
-            # filteredline = filteredline.replace("!", "")
-            # filteredline = filteredline.replace("?", "")
-            cleantext += filteredline
+            nfkd = normalize("NFKD", line)
+            cleantext += "".join([c for c in nfkd if c.isalpha()]).lower()
+
+            # cleantext = (
+            #     line.strip()
+            # )  # não sei se é preciso tirar a pontuação e os espaços ou se mantemos tudo como o original
     return cleantext
 
 
@@ -103,9 +97,9 @@ def main():
         if cipher_choice == "1":
             rotation = int(input("Rotation: "))
             encrypted_text = Caesar_encrypt_decrypt(rotation, cleantext)
-            with open("Caesar_encrypted_text.txt", "w") as file:
+            with open("Caesar_encrypted.txt", "w") as file:
                 file.write(encrypted_text)
-            print("Encrypted text written to Caesar_encrypted_text.txt")
+            print("Encrypted text written to Caesar_encrypted.txt")
 
             print("\nFrequency analysis of the encrypted text:")
             frequency_and_n_grams(encrypted_text)
@@ -113,9 +107,9 @@ def main():
         elif cipher_choice == "2":
             key = input("Enter the Vigenère cipher key: ")
             encrypted_text = Vigenere_cipher_encrypt(key, cleantext)
-            with open("Vigenere_encrypted_text.txt", "w") as file:
+            with open("Vigenere_encrypted.txt", "w") as file:
                 file.write(encrypted_text)
-            print("Encrypted text written to Vigenere_encrypted_text.txt")
+            print("Encrypted text written to Vigenere_encrypted.txt")
 
             print("\nFrequency analysis of the encrypted text:")
             frequency_and_n_grams(encrypted_text)
@@ -145,9 +139,9 @@ def main():
             decrypted_text = Caesar_encrypt_decrypt(
                 -rotation, ciphertext
             )  # In Caesar cipher, decrypting is the same as encrypting with a negative rotation
-            with open("Caesar_decrypted_text.txt", "w") as file:
+            with open("Caesar_decrypted.txt", "w") as file:
                 file.write(decrypted_text)
-            print("Decrypted text written to Caesar_decrypted_text.txt")
+            print("Decrypted text written to Caesar_decrypted.txt")
 
             print("\nFrequency analysis of the decrypted text:")
             frequency_and_n_grams(decrypted_text)
@@ -155,9 +149,9 @@ def main():
         elif cipher_choice == "2":
             key = input("Enter the Vigenère cipher key: ")
             decrypted_text = Vigenere_cipher_decrypt(key, ciphertext)
-            with open("Vigenere_decrypted_text.txt", "w") as file:
+            with open("Vigenere_decrypted.txt", "w") as file:
                 file.write(decrypted_text)
-            print("Decrypted text written to Vigenere_decrypted_text.txt")
+            print("Decrypted text written to Vigenere_decrypted.txt")
 
             print("\nFrequency analysis of the decrypted text:")
             frequency_and_n_grams(decrypted_text)
@@ -165,21 +159,21 @@ def main():
         else:
             print("Invalid cipher choice. Exiting.")
             sys.exit(1)
-    
+
     elif option == "4":
         ciphertext = readfile(input("Enter the path of the ciphertext file: "))
-        numbers=input("\nIntroduce the minimum and maximum numbers of n_grams to analyse, separated by a space: ")
-        n_gram_min, n_gram_max=numbers.split()
+        numbers = input(
+            "\nIntroduce the minimum and maximum numbers of n_grams to analyse, separated by a space: "
+        )
+        n_gram_min, n_gram_max = numbers.split()
 
         print("Kasiski examination:")
         kasiski_exam(ciphertext, int(n_gram_min), int(n_gram_max))
 
     elif option == "5":
         ciphertext = readfile(input("Enter the path of the ciphertext file: "))
-        
 
         print("Index of Coincidence:")
-        
 
 
 if __name__ == "__main__":
