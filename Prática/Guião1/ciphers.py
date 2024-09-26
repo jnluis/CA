@@ -1,6 +1,7 @@
 # João Luís, CA, September 2024
 
 from collections import Counter
+import math
 
 
 def Caesar_encrypt_decrypt(rotation, text):
@@ -56,10 +57,23 @@ def Vigenere_cipher_decrypt(key, text):
     return decrypted_text
 
 
+def prime_factors(n):
+    factors = []
+    while n % 2 == 0:
+        factors.append(2)
+        n = n // 2
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
+        while n % i == 0:
+            factors.append(i)
+            n = n // i
+    if n > 2:
+        factors.append(n)
+    return factors
+
+
 def kasiski_exam(ciphertext, min_n, max_n):
-    ciphertext = ciphertext.replace(" ", "")
     for n in range(min_n, max_n + 1):  # Loop over the range of n-gram lengths
-        print(f"\nAnalyzing {n}-grams:\n")
+        print(f"\nAnalyzing {n}-grams:")
 
         # Find all repeated n-grams in the ciphertext
         repeated_ngrams = {}
@@ -85,23 +99,18 @@ def kasiski_exam(ciphertext, min_n, max_n):
             print(f"No repeated {n}-grams found.")
             continue
 
-        # Calculate the distances between the repeated n-grams
+        # Calcular a distância entre os n-grams repetidos
         ngram_distances = []
         for positions in repeated_ngrams.values():
             for i in range(len(positions) - 1):
                 distance = positions[i + 1] - positions[i]
                 ngram_distances.append(distance)
 
-        # Output the results
-        print("Repeated n-grams and their positions:")
-        for ngram, positions in repeated_ngrams.items():
-            print(f"{ngram}: {positions}")
+        # Para ver quais são os n-grams encontrados
+        # print("Repeated n-grams and their positions:")
+        # for ngram, positions in repeated_ngrams.items():
+        #    print(f"{ngram}: {positions}")
 
-        # print("\nDistances between repeated n-grams:")
-        # for distance in ngram_distances:
-        #     print(distance)
-
-        # Perform a frequency analysis on the distances to find common divisors
         distance_counts = Counter(ngram_distances)
 
         print(
@@ -109,5 +118,12 @@ def kasiski_exam(ciphertext, min_n, max_n):
         )
         for distance, count in distance_counts.most_common():
             print(f"Distance: {distance}, Count: {count}")
+
+        # Para os 5 mais comuns, calcular os fatores primos
+        print("\nPrime factorization of top 5 distances:")
+        for distance, count in distance_counts.most_common(5):
+            factors = prime_factors(distance)
+            factorization = " * ".join(map(str, factors))
+            print(f"{distance} = {factorization}")
 
     return distance_counts

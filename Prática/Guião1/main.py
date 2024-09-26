@@ -53,9 +53,6 @@ def readfile(pathfile):
             nfkd = normalize("NFKD", line)
             cleantext += "".join([c for c in nfkd if c.isalpha()]).lower()
 
-            # cleantext = (
-            #     line.strip()
-            # )  # não sei se é preciso tirar a pontuação e os espaços ou se mantemos tudo como o original
     return cleantext
 
 
