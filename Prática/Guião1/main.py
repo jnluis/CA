@@ -1,59 +1,8 @@
 # João Luís, CA, September 2024
 
 import sys
-from collections import Counter
 from ciphers import *
-import re
-from unicodedata import normalize
-
-letters = "abcdefghijklmnopqrstuvwxyz"
-
-
-def frequency_and_n_grams(cleantext):
-    total_number_of_letters = 0
-    letter_dict = {letter: 0 for letter in letters}
-    for letter in cleantext:
-        if letter in letter_dict:
-            letter_dict[letter.lower()] += 1
-
-    sorted_pairs = sorted(
-        [(value, key) for (key, value) in letter_dict.items()], reverse=True
-    )
-    total_number_of_letters = sum(
-        letter_dict.values()
-    )  # Como já não tem espaços e pontuação, também podíamos fazer a length do texto
-
-    for value, letter in sorted_pairs:
-        percentage = value / total_number_of_letters
-        print(f"{letter}: {value} ({percentage:.3%})")
-
-    # Count and print n-grams (digrams and trigrams)
-    for n in [2, 3]:  # For both digrams and trigrams
-        ngrams = [cleantext[i : i + n] for i in range(len(cleantext) - n + 1)]
-        ngram_counts = Counter(ngrams)
-        sorted_ngrams = sorted(ngram_counts.items(), key=lambda x: x[1], reverse=True)
-
-        print(f"\n{n}-gram Frequencies:")
-        for ngram, count in sorted_ngrams:
-            percentage = count / sum(ngram_counts.values())
-            if (
-                " " in ngram
-            ):  # Como não tirei os espaços do texto (se for suposto, meter na função readfile ), meti aqui este if
-                continue
-            if (
-                percentage > 0.01
-            ):  # Só interessa os n-grams que têm uma frequência superior a 1%
-                print(f"{ngram}: {count} ({percentage:.3%})")
-
-
-def readfile(pathfile):
-    cleantext = ""
-    with open(pathfile, "r", encoding="utf-8") as file:
-        for line in file:
-            nfkd = normalize("NFKD", line)
-            cleantext += "".join([c for c in nfkd if c.isalpha()]).lower()
-
-    return cleantext
+from stats import *
 
 
 def main():
@@ -61,7 +10,7 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python3 main.py <arg>")
         sys.exit(1)
-    cleantext = readfile(sys.argv[1])
+    argtext = readfile(sys.argv[1])
 
     # Menu for user options
     print("Choose an option:\n")
@@ -75,11 +24,11 @@ def main():
 
     if option == "1":
         print("Frequency analysis of the plaintext:")
-        frequency_and_n_grams(cleantext)
+        frequency_and_n_grams(argtext)
 
     elif option == "2":
         print("Frequency analysis of the plaintext:")
-        frequency_and_n_grams(cleantext)
+        frequency_and_n_grams(argtext)
 
         # Encrypt the text
         print("\nChoose a cipher for encryption. Press q to exit.\n")
@@ -93,7 +42,7 @@ def main():
 
         if cipher_choice == "1":
             rotation = int(input("Rotation: "))
-            encrypted_text = Caesar_encrypt_decrypt(rotation, cleantext)
+            encrypted_text = Caesar_encrypt_decrypt(rotation, argtext)
             with open("Caesar_encrypted.txt", "w") as file:
                 file.write(encrypted_text)
             print("Encrypted text written to Caesar_encrypted.txt")
@@ -103,7 +52,7 @@ def main():
 
         elif cipher_choice == "2":
             key = input("Enter the Vigenère cipher key: ")
-            encrypted_text = Vigenere_cipher_encrypt(key, cleantext)
+            encrypted_text = Vigenere_cipher_encrypt(key, argtext)
             with open("Vigenere_encrypted.txt", "w") as file:
                 file.write(encrypted_text)
             print("Encrypted text written to Vigenere_encrypted.txt")
@@ -158,19 +107,22 @@ def main():
             sys.exit(1)
 
     elif option == "4":
-        ciphertext = readfile(input("Enter the path of the ciphertext file: "))
         numbers = input(
             "\nIntroduce the minimum and maximum numbers of n_grams to analyse, separated by a space: "
         )
         n_gram_min, n_gram_max = numbers.split()
 
         print("Kasiski examination:")
-        kasiski_exam(ciphertext, int(n_gram_min), int(n_gram_max))
+        kasiski_exam(argtext, int(n_gram_min), int(n_gram_max))
 
     elif option == "5":
-        ciphertext = readfile(input("Enter the path of the ciphertext file: "))
+        max_key_length = int(
+            input("\nIntroduce the maximum number of key lengths to analyse: ")
+        )
 
         print("Index of Coincidence:")
+        index_of_coincidence(argtext, max_key_length)
+        Ioc_plot()
 
 
 if __name__ == "__main__":

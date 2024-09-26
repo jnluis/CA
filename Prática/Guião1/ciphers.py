@@ -1,8 +1,5 @@
 # João Luís, CA, September 2024
 
-from collections import Counter
-import math
-
 
 def Caesar_encrypt_decrypt(rotation, text):
     encrypted_text = ""
@@ -55,75 +52,3 @@ def Vigenere_cipher_decrypt(key, text):
         else:
             decrypted_text += char
     return decrypted_text
-
-
-def prime_factors(n):
-    factors = []
-    while n % 2 == 0:
-        factors.append(2)
-        n = n // 2
-    for i in range(3, int(math.sqrt(n)) + 1, 2):
-        while n % i == 0:
-            factors.append(i)
-            n = n // i
-    if n > 2:
-        factors.append(n)
-    return factors
-
-
-def kasiski_exam(ciphertext, min_n, max_n):
-    for n in range(min_n, max_n + 1):  # Loop over the range of n-gram lengths
-        print(f"\nAnalyzing {n}-grams:")
-
-        # Find all repeated n-grams in the ciphertext
-        repeated_ngrams = {}
-        for i in range(len(ciphertext) - n + 1):
-            ngram = ciphertext[i : i + n]
-
-            if " " in ngram or "," in ngram:
-                continue
-
-            if ngram in repeated_ngrams:
-                repeated_ngrams[ngram].append(i)
-            else:
-                repeated_ngrams[ngram] = [i]
-
-        # Filter out n-grams that don't repeat
-        repeated_ngrams = {
-            ngram: positions
-            for ngram, positions in repeated_ngrams.items()
-            if len(positions) > 1
-        }
-
-        if not repeated_ngrams:
-            print(f"No repeated {n}-grams found.")
-            continue
-
-        # Calcular a distância entre os n-grams repetidos
-        ngram_distances = []
-        for positions in repeated_ngrams.values():
-            for i in range(len(positions) - 1):
-                distance = positions[i + 1] - positions[i]
-                ngram_distances.append(distance)
-
-        # Para ver quais são os n-grams encontrados
-        # print("Repeated n-grams and their positions:")
-        # for ngram, positions in repeated_ngrams.items():
-        #    print(f"{ngram}: {positions}")
-
-        distance_counts = Counter(ngram_distances)
-
-        print(
-            "\nDistance frequencies (most common distances may indicate the key length):"
-        )
-        for distance, count in distance_counts.most_common():
-            print(f"Distance: {distance}, Count: {count}")
-
-        # Para os 5 mais comuns, calcular os fatores primos
-        print("\nPrime factorization of top 5 distances:")
-        for distance, count in distance_counts.most_common(5):
-            factors = prime_factors(distance)
-            factorization = " * ".join(map(str, factors))
-            print(f"{distance} = {factorization}")
-
-    return distance_counts
