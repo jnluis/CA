@@ -18,7 +18,10 @@ def main():
     print("2. Analyse the text, encrypt, and analyse the encrypted text")
     print("3. Analyse ciphertext, decrypt, and analyse the plaintext")
     print("4. Kasiski Examination for Vigenère ciphertext")
-    print("5. Index of Coincidence for Vigenère ciphertext\n")
+    print("5. Index of Coincidence for Vigenère ciphertext")
+    print(
+        "6. Determin original language of a ciphertext created with a Vigenère cipher\n"
+    )
 
     option = input("Option: ")
 
@@ -123,6 +126,11 @@ def main():
         print("Index of Coincidence:")
         index_of_coincidence(argtext, max_key_length)
         Ioc_plot()
+    elif option == "6":
+        key_length = int(input("Enter estimated key length: "))
+
+        print("Guessing")
+        print(determine_original_language(argtext, key_length))
 
 
 if __name__ == "__main__":

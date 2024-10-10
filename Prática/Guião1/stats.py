@@ -164,3 +164,131 @@ def Ioc_plot():
     plt.ylabel("Average IoC")
     plt.title("Index of Coincidence")
     plt.savefig("IoC_plot.png")
+
+
+def determine_original_language(ciphertext, key_length):
+    # Fontes: Inglês -> https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
+    #        Francês -> https://www.sttmedia.com/characterfrequency-french
+    #       Espanhol -> https://es.wikipedia.org/wiki/Frecuencia_de_aparici%C3%B3n_de_letras
+    #      Português -> https://pt.wikipedia.org/wiki/Frequ%C3%AAncia_de_letras
+    known_frequencies = {
+        "english": {
+            "e": 11.1607,
+            "a": 8.4966,
+            "r": 7.5809,
+            "i": 7.5448,
+            "o": 7.1635,
+            "t": 6.9509,
+            "n": 6.6544,
+            "s": 5.7351,
+            "l": 5.4893,
+            "c": 4.5388,
+            "u": 3.6308,
+            "d": 3.3844,
+            "p": 3.1671,
+            "m": 3.0129,
+            "h": 3.0034,
+            "g": 2.4705,
+            "b": 2.072,
+        },
+        "french": {
+            "e": 15.1,
+            "a": 8.13,
+            "s": 7.91,
+            "t": 7.11,
+            "i": 6.94,
+            "r": 6.43,
+            "n": 6.42,
+            "u": 6.05,
+            "l": 5.68,
+            "o": 5.27,
+            "d": 3.55,
+            "m": 3.23,
+            "c": 3.15,
+            "p": 3.03,
+        },
+        "spanish": {
+            "e": 13.68,
+            "a": 12.53,
+            "o": 8.68,
+            "s": 7.98,
+            "r": 6.87,
+            "n": 6.71,
+            "i": 6.25,
+            "d": 5.86,
+            "l": 4.97,
+            "c": 4.68,
+            "t": 4.63,
+            "u": 3.93,
+            "m": 3.15,
+            "p": 2.51,
+        },
+        "portuguese": {
+            "a": 14.63,
+            "e": 12.57,
+            "o": 10.73,
+            "s": 7.81,
+            "r": 6.53,
+            "i": 6.18,
+            "n": 5.05,
+            "d": 4.99,
+            "m": 4.74,
+            "u": 4.63,
+            "t": 4.34,
+            "c": 3.88,
+            "l": 2.78,
+            "p": 2.52,
+        },
+    }  # abaixo dos 2% não considerei porque já é terreno mais suscetível a ruído
+
+    slices = [
+        "" for _ in range(key_length)
+    ]  # o underscore é uma convenção para variáveis que não são usadas
+    slice_frequencies = []
+
+    # Tem de ser assim, não pode ser com divisão normal ou //
+    for i, char in enumerate(ciphertext):
+        slices[i % key_length] += char
+
+    for slice_index, slice in enumerate(slices):
+        slice_freqs = Counter(slice)
+        total_letters = sum(slice_freqs.values())
+
+        # Normalize the frequencies
+        slice_freqs = {
+            letter: (count / total_letters) * 100
+            for letter, count in slice_freqs.items()
+        }
+        slice_frequencies.append(slice_freqs)
+
+        # dar uncomment deste bloco para ver que as frequências de cada slice são bastante similares
+        # sorted_freqs = sorted(slice_freqs.items(), key=lambda x: x[1], reverse=True)
+        # print(f"Slice {slice_index} frequency distribution (sorted):")
+        # for letter, freq in sorted_freqs:
+        #     print(f"{letter}: {freq:.2f}%")
+        # print("\n")
+
+    slice_language_scores = {}
+    for slice_index, slice_freqs in enumerate(slice_frequencies):
+        slice_language_scores[slice_index] = {}
+        for language, freqs in known_frequencies.items():
+            score = 0
+            for letter, freq in freqs.items():
+                score += abs(slice_freqs.get(letter, 0) - freq)
+            slice_language_scores[slice_index][language] = score
+
+    slice_language_assignments = {}
+    for slice_index, language_scores in slice_language_scores.items():
+        slice_language_assignments[slice_index] = min(
+            language_scores, key=language_scores.get
+        )
+        # print(f"Slice {slice_index} is most likely {slice_language_assignments[slice_index]}")
+
+    language_counts = Counter(
+        slice_language_assignments.values()
+    )  # Contar o número de vezes que cada língua aparece em cada slice
+    most_likely_language = max(
+        language_counts, key=language_counts.get
+    )  # A língua que aparece mais vezes é a mais provável
+
+    return most_likely_language
