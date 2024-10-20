@@ -20,13 +20,14 @@ def main():
     print("4. Kasiski Examination for Vigenère ciphertext")
     print("5. Index of Coincidence for Vigenère ciphertext")
     print(
-        "6. Determin original language of a ciphertext created with a Vigenère cipher\n"
+        "6. Determin original language of a ciphertext created with a Vigenère cipher"
     )
+    print("7. Non-cyclic polialphabetic cipher\n")
 
     option = input("Option: ")
 
     if option == "1":
-        print("Frequency analysis of the plaintext:")
+        print("Frequency analysis of the text:")
         frequency_and_n_grams(argtext)
 
     elif option == "2":
@@ -68,10 +69,8 @@ def main():
             sys.exit(1)
 
     elif option == "3":
-        ciphertext = readfile(input("Enter the path of the ciphertext file: "))
-
         print("Frequency analysis of the ciphertext:")
-        frequency_and_n_grams(ciphertext)
+        frequency_and_n_grams(argtext)
 
         # Decrypt the text
         print("\nChoose a cipher for decryption. Press q to exit.\n")
@@ -86,7 +85,7 @@ def main():
         if cipher_choice == "1":
             rotation = int(input("Rotation: "))
             decrypted_text = Caesar_encrypt_decrypt(
-                -rotation, ciphertext
+                -rotation, argtext
             )  # In Caesar cipher, decrypting is the same as encrypting with a negative rotation
             with open("Caesar_decrypted.txt", "w") as file:
                 file.write(decrypted_text)
@@ -97,7 +96,7 @@ def main():
 
         elif cipher_choice == "2":
             key = input("Enter the Vigenère cipher key: ")
-            decrypted_text = Vigenere_cipher_decrypt(key, ciphertext)
+            decrypted_text = Vigenere_cipher_decrypt(key, argtext)
             with open("Vigenere_decrypted.txt", "w") as file:
                 file.write(decrypted_text)
             print("Decrypted text written to Vigenere_decrypted.txt")
@@ -131,6 +130,14 @@ def main():
 
         print("Guessing")
         print(determine_original_language(argtext, key_length))
+
+    elif option == "7":
+        key = input("Enter the Vigenère cipher key: ")
+
+        encrypted_text = Vigenere_cipher_encrypt(key, argtext, rotate_increment=True)
+        with open("NonCyclic_Vigenere_encrypted.txt", "w") as file:
+            file.write(encrypted_text)
+        print("Encrypted text written to NonCyclic_Vigenere_encrypted.txt")
 
 
 if __name__ == "__main__":

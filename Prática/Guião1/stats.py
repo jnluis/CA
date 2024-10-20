@@ -35,9 +35,7 @@ def frequency_and_n_grams(cleantext):
         print(f"\n{n}-gram Frequencies:")
         for ngram, count in sorted_ngrams:
             percentage = count / sum(ngram_counts.values())
-            if (
-                " " in ngram
-            ):  # Como não tirei os espaços do texto (se for suposto, meter na função readfile ), meti aqui este if
+            if " " in ngram:
                 continue
             if (
                 percentage > 0.01
@@ -70,10 +68,9 @@ def prime_factors(n):
 
 
 def kasiski_exam(ciphertext, min_n, max_n):
-    for n in range(min_n, max_n + 1):  # Loop over the range of n-gram lengths
+    for n in range(min_n, max_n + 1):
         print(f"\nAnalyzing {n}-grams:")
 
-        # Find all repeated n-grams in the ciphertext
         repeated_ngrams = {}
         for i in range(len(ciphertext) - n + 1):
             ngram = ciphertext[i : i + n]
@@ -86,7 +83,7 @@ def kasiski_exam(ciphertext, min_n, max_n):
             else:
                 repeated_ngrams[ngram] = [i]
 
-        # Filter out n-grams that don't repeat
+        # Tirar fora n-grams que não se repetem
         repeated_ngrams = {
             ngram: positions
             for ngram, positions in repeated_ngrams.items()
