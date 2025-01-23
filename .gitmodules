@@ -1,7 +1,7 @@
 [submodule "CA_P2"]
-	path = CA_P2
+	path = Prática/CA_P2
 	url = git@github.com:jnluis/CA_P2.git
 	
 [submodule "CA_P1"]
-	path = CA_P1
-	url = git@github.com:dianarrmiranda/CA_P1.git
+	path = Prática/CA_P1
+	url = git@github.com:jnluis/CA_P1.git
